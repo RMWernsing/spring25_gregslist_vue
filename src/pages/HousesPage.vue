@@ -28,6 +28,7 @@ async function getHouses() {
   <section class="container">
     <div class="row">
       <div class="col-12">
+
         <h1 class="display-3 text-center">Houses</h1>
       </div>
       <div v-for="house in houses" :key="house.id" class="col-12">
