@@ -1,10 +1,32 @@
 <script setup>
+import { AppState } from '@/AppState.js';
 import { House } from '@/models/House.js';
+import { housesService } from '@/services/HousesService.js';
+import { logger } from '@/utils/Logger.js';
+import { Pop } from '@/utils/Pop.js';
+import { computed } from 'vue';
 
 
 defineProps({
   houseProp: { type: House, required: true }
 })
+
+const account = computed(() => AppState.account)
+
+async function deleteHouse(houseId) {
+  try {
+    const confirmed = await Pop.confirm('Are you sure you want to delete this house?', 'If you do it will be gone forever.', 'YES', 'NO')
+    if (!confirmed) {
+      return
+    }
+    await housesService.deleteHouse(houseId)
+
+  }
+  catch (error) {
+    Pop.error(error, 'Could not delet house')
+    logger.error('COULD NOT DELETE HOUSE', error)
+  }
+}
 
 </script>
 
@@ -35,8 +57,10 @@ defineProps({
         <p v-if="houseProp.description">{{ houseProp.description }}</p>
         <p v-else>A beautiful house</p>
       </div>
-      <div class="d-flex justify-content-between mt-5">
-        <button class="btn btn-outline-danger">
+      <div class="d-flex justify-content-end mt-5"
+        :class="{ 'justify-content-between': houseProp.creatorId == account?.id }">
+        <button v-if="houseProp.creatorId == account?.id" @click="deleteHouse(houseProp.id)"
+          class="btn btn-outline-danger">
           delete <span class="mdi mdi-trash-can-outline"></span>
         </button>
         <div class="d-flex align-items-center gap-2 margin-bottom">
@@ -57,7 +81,7 @@ defineProps({
 }
 
 img {
-  height: 40dvh;
+  height: 45dvh;
   object-fit: cover;
 
 }
